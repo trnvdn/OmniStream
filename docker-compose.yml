@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # INFRASTRUCTURE
+  
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: omni-mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Password123
+    ports:
+      - "1433:1433"
+    networks:
+      - omni-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: omni-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - omni-net
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: omni-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - omni-net
+
+  # MICROSERVICES
+  # OmniStream.Ingestion.Api
+  ingestion-api:
+    container_name: omni-ingestion
+    build:
+      context: ./Backend
+      dockerfile: OmniStream.Ingestion.Api/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=OmniStreamDb;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      - rabbitmq
+    networks:
+      - omni-net
+
+  # OmniStream.Notification.Hub
+  notification-hub:
+    container_name: omni-notification
+    build:
+      context: ./Backend
+      dockerfile: OmniStream.Notification.Hub/Dockerfile
+    environment:
+      - RabbitMQ__Host=rabbitmq
+      - Redis__ConnectionString=redis:6379 
+    depends_on:
+      - rabbitmq
+      - redis
+    networks:
+      - omni-net
+
+  # OmniStream.Analytics.Worker
+  analytics-worker:
+    container_name: omni-analytics
+    build:
+      context: ./Backend
+      dockerfile: OmniStream.Analytics.Worker/Dockerfile
+    environment:
+      - Redis__ConnectionString=redis:6379
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      - rabbitmq
+      - redis
+    networks:
+      - omni-net
+
+  # OmniStream.Storage.Worker
+  storage-worker:
+    container_name: omni-storage
+    build:
+      context: ./Backend
+      dockerfile: OmniStream.Storage.Worker/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=OmniStreamDb;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      - mssql
+      - rabbitmq
+    networks:
+      - omni-net
+
+
+  frontend:
+    container_name: omni-frontend
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile 
+    environment:
+      - VITE_API_URL=/api
+      - VITE_HUB_URL=/hub
+    networks:
+      - omni-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: omni-gateway
+    volumes:
+      - ./devops/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80" 
+    depends_on:
+      - frontend
+      - ingestion-api
+      - notification-hub
+    networks:
+      - omni-net
+
+networks:
+  omni-net:
+    driver: bridge
