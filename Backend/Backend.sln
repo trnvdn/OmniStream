@@ -12,6 +12,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniStream.Ingestion.Api", "OmniStream.Ingestion.Api\OmniStream.Ingestion.Api.csproj", "{E9FEAB82-EDE7-466F-B0E7-B65AC5C9FF0C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniStream.Analytics.Worker.Tests", "OmniStream.Analytics.Worker.Tests\OmniStream.Analytics.Worker.Tests.csproj", "{25292DDA-1A10-4260-876F-1C835E69BD74}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A3757E5C-0003-40FB-9DA0-50F2B5E444A8} = {A3757E5C-0003-40FB-9DA0-50F2B5E444A8}
+		{D6FA3049-E475-42C5-A06B-FD447D744C50} = {D6FA3049-E475-42C5-A06B-FD447D744C50}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniStream.Ingestion.Api.Tests", "OmniStream.Ingestion.Api.Tests\OmniStream.Ingestion.Api.Tests.csproj", "{F427659F-CAF4-440B-82FC-4B049EE6BAF5}"
 EndProject

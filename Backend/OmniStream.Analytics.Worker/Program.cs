@@ -1,23 +1,20 @@
-var builder = WebApplication.CreateBuilder(args);
+using OmniStream.Analytics.Worker.Configuration;
+using OmniStream.Analytics.Worker.Services;
+using StackExchange.Redis;
 
-// Add services to the container.
+var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOptions<OmniStreamSettings>()
+       .Bind(builder.Configuration)
+       .ValidateDataAnnotations()
+       .ValidateOnStart();
 
-var app = builder.Build();
+var redisConn = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(redisConn));
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+builder.Services.AddSingleton<RedisMetricsRepository>();
+builder.Services.AddHostedService<Worker>();
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+var host = builder.Build();
+host.Run();
