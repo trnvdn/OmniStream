@@ -98,7 +98,7 @@ namespace OmniStream.Analytics.Worker.Services
             _channel.BasicPublish(exchange: _settings.ExchangeName, routingKey: "", basicProperties: null, body: body);
         }
 
-        private bool TryExtractValue(object payload, out double result)
+        public static bool TryExtractValue(object payload, out double result)
         {
             result = 0;
             if (payload is JsonElement element)
