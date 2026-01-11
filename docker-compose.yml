@@ -74,7 +74,11 @@ services:
       - RabbitMQ__Host=rabbitmq
       - RabbitMQ__Username=admin
       - RabbitMQ__Password=4Ee&9ZGHx9dk
+      - RabbitMQ__QueueName=metrics_queue
+      - RabbitMQ__ExchangeName=alerts_exchange
       - Redis__ConnectionString=redis:6379
+      - Redis__WindowSeconds=60
+      - Redis__TtlMinutes=20
     depends_on:
       - rabbitmq
       - redis
@@ -95,7 +99,6 @@ services:
       - rabbitmq
     networks:
       - omni-net
-
 
   frontend:
     container_name: omni-frontend

@@ -12,5 +12,7 @@ namespace OmniStream.Analytics.Worker.Configuration
         public string Password { get; set; } = default!;
         [Required]
         public string QueueName { get; set; } = default!;
+        [Required]
+        public string ExchangeName { get; set; } = default!;
     }
 }
