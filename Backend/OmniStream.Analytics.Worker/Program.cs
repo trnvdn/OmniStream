@@ -1,23 +1,13 @@
-var builder = WebApplication.CreateBuilder(args);
+using OmniStream.Analytics.Worker.Configuration;
 
-// Add services to the container.
+var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOptions<OmniStreamSettings>()
+       .Bind(builder.Configuration)
+       .ValidateDataAnnotations()
+       .ValidateOnStart();
 
-var app = builder.Build();
+builder.Services.AddSwaggerGen();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+var host = builder.Build();
+host.Run();

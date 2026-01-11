@@ -29,8 +29,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=4Ee&9ZGHx9dk
     networks:
       - omni-net
 
@@ -71,8 +71,10 @@ services:
       context: ./Backend
       dockerfile: OmniStream.Analytics.Worker/Dockerfile
     environment:
-      - Redis__ConnectionString=redis:6379
       - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=admin
+      - RabbitMQ__Password=4Ee&9ZGHx9dk
+      - Redis__ConnectionString=redis:6379
     depends_on:
       - rabbitmq
       - redis
